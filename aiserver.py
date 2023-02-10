@@ -1587,8 +1587,8 @@ def general_startup(override_args=None):
     if args.quiet:
         koboldai_vars.quiet = True
 
-    #if args.nobreakmodel:
-    koboldai_vars.nobreakmodel = True;
+    if args.nobreakmodel:
+        koboldai_vars.nobreakmodel = True
 
     if args.remote:
         koboldai_vars.host = True;
@@ -1796,10 +1796,16 @@ def get_layer_count(model, directory=""):
             if ((utils.HAS_ACCELERATE and model_config.model_type != 'gpt2') or model_config.model_type in ("gpt_neo", "gptj", "xglm", "opt")) and not koboldai_vars.nobreakmodel:
                 return utils.num_layers(model_config)
             else:
+                logger.warning("First None")
+                logger.warning("utils.HAS_ACCELERATE: {}".format(utils.HAS_ACCELERATE))
+                logger.warning("model_config.model_type: {}".format(model_config.model_type))
+                logger.warning("koboldai_vars.nobreakmodel: {}".format(koboldai_vars.nobreakmodel))
                 return None
         except:
+            logger.warning("Exception None")
             return None
     else:
+        logger.warning("Second None")
         return None
 
 @socketio.on('OAI_Key_Update')
@@ -3049,7 +3055,11 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                 else:
                     yield False
             if use_8_bit:
-				koboldai_vars.lazy_load = False
+                koboldai_vars.lazy_load = False
+                koboldai_vars.nobreakmodel = True
+            else:
+                if not args.nobreakmodel:
+                    koboldai_vars.nobreakmodel = False
             # If custom GPT2 model was chosen
             if(koboldai_vars.model_type == "gpt2"):
                 koboldai_vars.lazy_load = False
@@ -3226,7 +3236,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                     if(koboldai_vars.usegpu):
                         koboldai_vars.modeldim = get_hidden_size_from_model(model)
                         if not use_8_bit:
-							model = model.half().to(koboldai_vars.gpu_device)
+                            model = model.half().to(koboldai_vars.gpu_device)
                         generator = model.generate
                     elif(koboldai_vars.breakmodel):  # Use both RAM and VRAM (breakmodel)
                         koboldai_vars.modeldim = get_hidden_size_from_model(model)
