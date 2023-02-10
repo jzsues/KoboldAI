@@ -1642,7 +1642,6 @@ function selected_model_info(data) {
 	//hide or unhide 8 bit mode
 	if (data.bit_8_available) {
 		document.getElementById("use_8_bit_div").classList.remove("hidden");
-		set_8_bit_mode(invert=false);
 	} else {
 		document.getElementById("use_8_bit_div").classList.add("hidden");
 		document.getElementById("use_8_bit").checked = false;
@@ -1817,6 +1816,7 @@ function selected_model_info(data) {
 	}
 	accept.disabled = false;
 	
+	set_8_bit_mode(invert=false);
 	
 }
 

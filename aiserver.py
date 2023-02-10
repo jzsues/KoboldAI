@@ -2708,6 +2708,13 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
         disk_layers = args.breakmodel_disklayers
     if breakmodel_args_default_to_cpu and disk_layers is None:
         disk_layers = args.breakmodel_disklayers = 0
+        
+    if use_8_bit:
+        koboldai_vars.lazy_load = False
+        koboldai_vars.nobreakmodel = True
+    else:
+        if not args.nobreakmodel:
+            koboldai_vars.nobreakmodel = False
     
     unload_model()
     
@@ -3054,12 +3061,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                     torch.set_default_dtype(original_dtype)
                 else:
                     yield False
-            if use_8_bit:
-                koboldai_vars.lazy_load = False
-                koboldai_vars.nobreakmodel = True
-            else:
-                if not args.nobreakmodel:
-                    koboldai_vars.nobreakmodel = False
+
             # If custom GPT2 model was chosen
             if(koboldai_vars.model_type == "gpt2"):
                 koboldai_vars.lazy_load = False

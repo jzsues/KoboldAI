@@ -1291,7 +1291,13 @@ class system_settings(settings):
         #check if bitsandbytes is installed
         self.bit_8_available = False
         if importlib.util.find_spec("bitsandbytes") is not None:# and sys.platform.startswith('linux'): #We can install bitsandbytes, but it doesn't work on windows, so limit it here
-            if torch.cuda.is_available():
+            try:
+                import bitsandbytes
+                bits_and_bytes = True
+            except:
+                bits_and_bytes = False
+                pass
+            if torch.cuda.is_available() and bits_and_bytes:
                 for device in range(torch.cuda.device_count()):
                     if torch.cuda.get_device_properties(device).major > 7:
                         self.bit_8_available = True
