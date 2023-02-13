@@ -8,5 +8,5 @@ RUN chmod +x /opt/koboldai/docker-helper.sh
 EXPOSE 5000/tcp
 ENV githubaddress=https://github.com/henk717/KoboldAI
 ENV githubbranch=united
-ENV install_packages=false
+ENV install_packages=true
 CMD /opt/koboldai/docker-helper.sh

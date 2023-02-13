@@ -1469,6 +1469,8 @@ def general_startup(override_args=None):
     global args
     
     import configparser
+    config = configparser.ConfigParser()
+    config.read('.git/config')
     koboldai_vars.git_repository = config['remote "origin"']['url']
     for item in config.sections():
         if "branch" in item:
