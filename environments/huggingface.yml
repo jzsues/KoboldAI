@@ -9,7 +9,7 @@ dependencies:
   - flask-session
   - pytorch=1.11.*
   - python=3.8.*
-  - cudatoolkit=11.6
+  - cudatoolkit=11.1
   - eventlet
   - dnspython=2.2.1
   - markdown
