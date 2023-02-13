@@ -45,7 +45,7 @@ if [[ ! -v KOBOLDAI_MODELDIR ]];then
 	ln -s $KOBOLDAI_MODELDIR/functional_models/ functional_models
 fi
 
-for FILE in $KOBOLDAI_DATADIR*
+for FILE in $KOBOLDAI_DATADIR/*
 do
     FILENAME="$(basename $FILE)"
 	rm /opt/koboldai/$FILENAME
