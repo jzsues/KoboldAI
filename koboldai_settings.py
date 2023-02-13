@@ -1204,7 +1204,7 @@ class system_settings(settings):
                          'lua_koboldcore', 'sp', 'sp_length', '_horde_pid', 'horde_share', 'aibusy', 
                          'serverstarted', 'inference_config', 'image_pipeline', 'summarizer', 
                          'summary_tokenizer', 'use_colab_tpu', 'noai', 'disable_set_aibusy', 'cloudflare_link', 'tts_model',
-                         'generating_image', 'bit_8_available', 'host', 'hascuda', 'usegpu']
+                         'generating_image', 'bit_8_available', 'host', 'hascuda', 'usegpu', 'git_repository', 'git_branch']
     settings_name = "system"
     def __init__(self, socketio, koboldai_var):
         self._socketio = socketio
@@ -1306,6 +1306,8 @@ class system_settings(settings):
                         self.bit_8_available = True
                         break
         self.seen_messages = []
+        self.git_repository = ""
+        self.git_branch = ""
         
         
         @dataclass

@@ -1467,6 +1467,15 @@ def spRequest(filename):
 #==================================================================#
 def general_startup(override_args=None):
     global args
+    
+    import configparser
+    koboldai_vars.git_repository = config['remote "origin"']['url']
+    for item in config.sections():
+        if "branch" in item:
+            koboldai_vars.git_branch = item.replace("branch ", "").replace('"', '')
+    
+    logger.info("Running on Repo: {} Branch: {}".format(koboldai_vars.git_repository, koboldai_vars.git_branch))
+    
     # Parsing Parameters
     parser = argparse.ArgumentParser(description="KoboldAI Server")
     parser.add_argument("--remote", action='store_true', help="Optimizes KoboldAI for Remote Play")
