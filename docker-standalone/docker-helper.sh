@@ -4,6 +4,7 @@ cd /opt/koboldai
 if [[ -n update ]];then
     git remote set-url origin $githubaddress
 	git reset --hard origin/$githubbranch
+	git checkout $githubbranch
 	./install_requirements.sh cuda
 	git submodule update --init --recursive
 fi
