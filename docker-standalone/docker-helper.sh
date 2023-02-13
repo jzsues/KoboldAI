@@ -2,7 +2,9 @@
 cd /opt/koboldai
 
 if [[ -n update ]];then
-        git pull --force --recurse-submodules --prune $githubaddress $githubbranch && ./install_requirements.sh cuda
+    git remote set-url origin $githubaddress
+	git reset --hard origin/$githubbranch
+	./install_requirements.sh cuda
 	git submodule update --init --recursive
 fi
 
