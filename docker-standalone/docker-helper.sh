@@ -6,7 +6,7 @@ if [[ -n update ]];then
 	git pull --ff
 	git reset --hard origin/$githubbranch
 	git checkout $githubbranch
-	if [ install_packages = true ];then
+	if [ install_packages != false ];then
 		./install_requirements.sh cuda
 	fi
 	git submodule update --init --recursive
