@@ -9,7 +9,7 @@ dependencies:
   - flask-session
   - pytorch=1.11.*
   - python=3.8.*
-  - cudatoolkit=11.1
+  - cudatoolkit=11.6
   - eventlet
   - dnspython=2.2.1
   - markdown
@@ -39,7 +39,8 @@ dependencies:
     - ansi2html
     - flask_compress
     - ijson
-    - bitsandbytes
     - ftfy
     - pydub
     - diffusers
+    - git+https://github.com/younesbelkada/transformers@bnb_add_custom_map
+    - git+https://github.com/telpirion/bitsandbytes
