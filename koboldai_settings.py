@@ -1204,7 +1204,7 @@ class system_settings(settings):
                          'lua_koboldcore', 'sp', 'sp_length', '_horde_pid', 'horde_share', 'aibusy', 
                          'serverstarted', 'inference_config', 'image_pipeline', 'summarizer', 
                          'summary_tokenizer', 'use_colab_tpu', 'noai', 'disable_set_aibusy', 'cloudflare_link', 'tts_model',
-                         'generating_image', 'bit_8_available', 'host', 'hascuda', 'usegpu']
+                         'generating_image', 'bit_8_available', 'host', 'hascuda', 'usegpu', 'git_repository', 'git_branch']
     settings_name = "system"
     def __init__(self, socketio, koboldai_var):
         self._socketio = socketio
@@ -1290,8 +1290,14 @@ class system_settings(settings):
         self.experimental_features = False
         #check if bitsandbytes is installed
         self.bit_8_available = False
-        if importlib.util.find_spec("bitsandbytes") is not None and sys.platform.startswith('linux'): #We can install bitsandbytes, but it doesn't work on windows, so limit it here
-            if torch.cuda.is_available():
+        if importlib.util.find_spec("bitsandbytes") is not None:# and sys.platform.startswith('linux'): #We can install bitsandbytes, but it doesn't work on windows, so limit it here
+            try:
+                import bitsandbytes
+                bits_and_bytes = True
+            except:
+                bits_and_bytes = False
+                pass
+            if torch.cuda.is_available() and bits_and_bytes:
                 for device in range(torch.cuda.device_count()):
                     if torch.cuda.get_device_properties(device).major > 7:
                         self.bit_8_available = True
@@ -1300,6 +1306,8 @@ class system_settings(settings):
                         self.bit_8_available = True
                         break
         self.seen_messages = []
+        self.git_repository = ""
+        self.git_branch = ""
         
         
         @dataclass

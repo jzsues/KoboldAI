@@ -29,7 +29,7 @@ dependencies:
     - flask-ngrok
     - flask-cors
     - lupa==1.10
-    - transformers==4.25.1
+    #- transformers==4.25.1
     - huggingface_hub>=0.10.1
     - safetensors
     - accelerate
@@ -39,7 +39,8 @@ dependencies:
     - ansi2html
     - flask_compress
     - ijson
-    - bitsandbytes
     - ftfy
     - pydub
     - diffusers
+    - git+https://github.com/younesbelkada/transformers@bnb_add_custom_map
+    - git+https://github.com/telpirion/bitsandbytes
