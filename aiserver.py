@@ -8082,7 +8082,7 @@ def ui2_serve_themes(path):
 @logger.catch
 def upload_file(data):
     logger.debug("upload_file {}".format(data['filename']))
-    if data['upload_no_save']:
+    if 'upload_no_save' in data and data['upload_no_save']:
         json_data = json.loads(data['data'].decode("utf-8"))
         loadJSON(json_data)
     else:
@@ -10594,7 +10594,7 @@ class StoryChunkSchema(StoryNumsChunkSchema, KoboldSchema):
 class StorySchema(KoboldSchema):
     results: List[StoryChunkSchema] = fields.List(fields.Nested(StoryChunkSchema), required=True, metadata={"description": "Array of story actions. The array is sorted such that actions closer to the end of this array are closer to the end of the story."})
 
-class BasicBooleanSchema(KoboldSchema):
+class BasicBooleanResultSchema(KoboldSchema):
     result: bool = fields.Boolean(required=True)
 
 class StoryNumsSchema(KoboldSchema):
@@ -11282,7 +11282,7 @@ def get_story_nums_num(num: int):
           description: Successful request
           content:
             application/json:
-              schema: BasicBooleanSchema
+              schema: BasicBooleanResultSchema
     """
     if num == 0:
         return {"result": koboldai_vars.gamestarted}
@@ -11680,7 +11680,7 @@ def get_world_info_uids_uid(uid: int):
           description: Successful request
           content:
             application/json:
-              schema: BasicBooleanSchema
+              schema: BasicBooleanResultSchema
     """
     return {"result": uid in koboldai_vars.worldinfo_u and koboldai_vars.worldinfo_u[uid]["init"]}
 
@@ -11813,7 +11813,7 @@ def get_world_info_folders_none_uids_uid(uid: int):
           description: Successful request
           content:
             application/json:
-              schema: BasicBooleanSchema
+              schema: BasicBooleanResultSchema
     """
     return {"result": uid in koboldai_vars.worldinfo_u and koboldai_vars.worldinfo_u[uid]["folder"] is None and koboldai_vars.worldinfo_u[uid]["init"]}
 
@@ -11950,7 +11950,7 @@ def get_world_info_folders_folder_uid_uids_entry_uid(folder_uid: int, entry_uid:
           description: Successful request
           content:
             application/json:
-              schema: BasicBooleanSchema
+              schema: BasicBooleanResultSchema
     """
     return {"result": entry_uid in koboldai_vars.worldinfo_u and koboldai_vars.worldinfo_u[entry_uid]["folder"] == folder_uid and koboldai_vars.worldinfo_u[entry_uid]["init"]}
 
@@ -12479,7 +12479,7 @@ def get_world_info_uid_selective(uid: int):
           description: Successful request
           content:
             application/json:
-              schema: BasicBooleanSchema
+              schema: BasicBooleanResultSchema
         404:
           description: Not found
           content:
@@ -12571,7 +12571,7 @@ def get_world_info_uid_constant(uid: int):
           description: Successful request
           content:
             application/json:
-              schema: BasicBooleanSchema
+              schema: BasicBooleanResultSchema
         404:
           description: Not found
           content:
