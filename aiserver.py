@@ -7424,17 +7424,6 @@ def loadRequest(loadpath, filename=None):
     if not loadpath:
         return
         
-    #Original UI only sends the story name and assumes it's always a .json file... here we check to see if it's a directory to load that way
-    if not os.path.exists(loadpath):
-        if os.path.exists(loadpath.replace(".json", "")):
-            loadpath = loadpath.replace(".json", "")
-
-    if os.path.isdir(loadpath):
-        if not valid_v3_story(loadpath):
-            raise RuntimeError(f"Tried to load {loadpath}, a non-save directory.")
-        koboldai_vars.update_story_path_structure(loadpath)
-        loadpath = os.path.join(loadpath, "story.json")
-
     start_time = time.time()
     # Leave Edit/Memory mode before continuing
     exitModes()
@@ -7442,6 +7431,17 @@ def loadRequest(loadpath, filename=None):
     # Read file contents into JSON object
     start_time = time.time()
     if(isinstance(loadpath, str)):
+        #Original UI only sends the story name and assumes it's always a .json file... here we check to see if it's a directory to load that way
+        if not os.path.exists(loadpath):
+            if os.path.exists(loadpath.replace(".json", "")):
+                loadpath = loadpath.replace(".json", "")
+
+        if os.path.isdir(loadpath):
+            if not valid_v3_story(loadpath):
+                raise RuntimeError(f"Tried to load {loadpath}, a non-save directory.")
+            koboldai_vars.update_story_path_structure(loadpath)
+            loadpath = os.path.join(loadpath, "story.json")
+            
         with open(loadpath, "r") as file:
             js = json.load(file)
             from_file=loadpath
