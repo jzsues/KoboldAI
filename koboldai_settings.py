@@ -1298,13 +1298,7 @@ class system_settings(settings):
                 bits_and_bytes = False
                 pass
             if torch.cuda.is_available() and bits_and_bytes:
-                for device in range(torch.cuda.device_count()):
-                    if torch.cuda.get_device_properties(device).major > 7:
-                        self.bit_8_available = True
-                        break
-                    elif torch.cuda.get_device_properties(device).major == 7 and torch.cuda.get_device_properties(device).minor >= 2:
-                        self.bit_8_available = True
-                        break
+                self.bit_8_available = True
         self.seen_messages = []
         self.git_repository = ""
         self.git_branch = ""
