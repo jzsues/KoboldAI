@@ -39,9 +39,9 @@ dependencies:
     - ansi2html
     - flask_compress
     - ijson
-    #- bitsandbytes
+    - bitsandbytes
     - ftfy
     - pydub
     - diffusers
     - git+https://github.com/younesbelkada/transformers@bnb_add_custom_map
-    - git+https://github.com/telpirion/bitsandbytes
+    #- git+https://github.com/telpirion/bitsandbytes
