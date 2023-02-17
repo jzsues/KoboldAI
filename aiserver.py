@@ -2682,7 +2682,7 @@ def unload_model():
     koboldai_vars.badwordsids = koboldai_settings.badwordsids_default
     
     
-def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=False, online_model="", use_breakmodel_args=False, breakmodel_args_default_to_cpu=False, url=None, use_8_bit=False):
+def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=False, online_model="", use_breakmodel_args=False, breakmodel_args_default_to_cpu=False, url=None, use_8_bit=False, total_layers=0):
     global model
     global generator
     global torch
@@ -3143,8 +3143,31 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                 with maybe_use_float16(), torch_lazy_loader.use_lazy_torch_load(enable=koboldai_vars.lazy_load, callback=get_lazy_load_callback(utils.num_layers(model_config)) if koboldai_vars.lazy_load else None, dematerialized_modules=True):
                     if(koboldai_vars.lazy_load):  # torch_lazy_loader.py and low_cpu_mem_usage can't be used at the same time
                         lowmem = {}
+                    device_map = {"model.decoder.embed_tokens": 0, "model.decoder.embed_positions": 0, "model.decoder.final_layer_norm": 0, "lm_head": 0}
+                    if not isinstance(gpu_layers, list):
+                        gpu_layers = [int(x) for x in gpu_layers.split(",")]
+                    current_layer = 0
+                    for i in range(len(gpu_layers)):
+                        for j in range(gpu_layers[i]+1):
+                            if current_layer == 0:
+                                device_map["model.decoder.embed_tokens"] = i
+                                device_map["model.decoder.embed_positions"] = i
+                                device_map["model.decoder.final_layer_norm"] = i
+                                device_map["lm_head"] = i
+                            device_map["model.decoder.layers.{}".format(current_layer)] = i
+                            current_layer += 1
+                    for i in range(current_layer, int(total_layers)+1):
+                        if current_layer == 0:
+                            device_map["model.decoder.embed_tokens"] = "cpu"
+                            device_map["model.decoder.embed_positions"] = "cpu"
+                            device_map["model.decoder.final_layer_norm"] = "cpu"
+                            device_map["lm_head"] = "cpu"
+                        device_map["model.decoder.layers.{}".format(i)] = "cpu"
+                    
+                    print(device_map)
+                        
                     if use_8_bit:
-                        properties_for_8_bit = {"load_in_8bit": True, "device_map": 'auto'}
+                        properties_for_8_bit = {"load_in_8bit": True, "device_map": device_map}
                     else:
                         properties_for_8_bit = {"load_in_8bit": False}
                     if(os.path.isdir(koboldai_vars.custmodpth)):
@@ -8791,7 +8814,7 @@ def UI_2_load_model(data):
     koboldai_vars.model = data['model']
     koboldai_vars.custmodpth = data['path']
     print("loading Model")
-    load_model(use_gpu=data['use_gpu'], gpu_layers=data['gpu_layers'], disk_layers=data['disk_layers'], online_model=data['online_model'], url=koboldai_vars.colaburl, use_8_bit=data['use_8_bit'])
+    load_model(use_gpu=data['use_gpu'], gpu_layers=data['gpu_layers'], disk_layers=data['disk_layers'], online_model=data['online_model'], url=koboldai_vars.colaburl, use_8_bit=data['use_8_bit'], total_layers=data['total_layers'])
 
 #==================================================================#
 # Event triggered when load story is clicked

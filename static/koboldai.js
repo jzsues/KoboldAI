@@ -1848,10 +1848,10 @@ function load_model() {
 	disk_layers = 0;
 	if (!(document.getElementById("modellayers").classList.contains("hidden"))) {
 		for (let i=0; i < document.getElementById("gpu_count").value; i++) {
-			gpu_layers.push(document.getElementById("gpu_layers_"+i).value);
+			gpu_layers.push(parseInt(document.getElementById("gpu_layers_"+i).value));
 		}
 		if (document.getElementById("disk_layers")) {
-			disk_layers = document.getElementById("disk_layers").value;
+			disk_layers = parseInt(document.getElementById("disk_layers").value);
 		}
 	}
 	//Need to do different stuff with custom models
@@ -1878,7 +1878,8 @@ function load_model() {
 			   'key': document.getElementById('modelkey').value, 'gpu_layers': gpu_layers.join(), 
 			   'disk_layers': disk_layers, 'url': document.getElementById("modelurl").value, 
 			   'online_model': selected_models,
-			   'use_8_bit': document.getElementById('use_8_bit').checked};
+			   'use_8_bit': document.getElementById('use_8_bit').checked,
+			   'total_layers': document.getElementById('gpu_layers_max').innerText};
 	console.log(message);
 	socket.emit("load_model", message);
 	closePopups();
@@ -3169,11 +3170,11 @@ function set_8_bit_mode(invert=true) { //we flip this because the event is fired
 	if (invert) {
 		bit_8_status = !bit_8_status;
 	}
-	if (bit_8_status) {
-		document.getElementById("modellayers").classList.add("hidden");
-	} else {
-		document.getElementById("modellayers").classList.remove("hidden");
-	}
+	//if (bit_8_status) {
+	//	document.getElementById("modellayers").classList.add("hidden");
+	//} else {
+	//	document.getElementById("modellayers").classList.remove("hidden");
+	//}
 }
 
 function set_ui_level(level) {

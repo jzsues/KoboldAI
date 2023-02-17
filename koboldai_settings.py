@@ -1299,6 +1299,7 @@ class system_settings(settings):
                 pass
             if torch.cuda.is_available() and bits_and_bytes:
                 self.bit_8_available = True
+        logger.info("8 Bit Mode Available: {}".format(self.bit_8_available))
         self.seen_messages = []
         self.git_repository = ""
         self.git_branch = ""
