@@ -1774,7 +1774,7 @@ def get_model_info(model, directory=""):
                          'disk_break_value': disk_blocks, 'disk_break': utils.HAS_ACCELERATE,
                          'break_values': break_values, 'gpu_count': gpu_count,
                          'url': url, 'gpu_names': gpu_names, 'models_on_url': models_on_url, 'show_online_model_select': show_online_model_select,
-                         'bit_8_available': koboldai_vars.bit_8_available if koboldai_vars.experimental_features else False,
+                         'bit_8_available': koboldai_vars.bit_8_available,
                          'show_custom_model_box': show_custom_model_box})
     if send_horde_models:
         get_cluster_models({'key': key_value, 'url': default_url})
@@ -3143,40 +3143,44 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                 with maybe_use_float16(), torch_lazy_loader.use_lazy_torch_load(enable=koboldai_vars.lazy_load, callback=get_lazy_load_callback(utils.num_layers(model_config)) if koboldai_vars.lazy_load else None, dematerialized_modules=True):
                     if(koboldai_vars.lazy_load):  # torch_lazy_loader.py and low_cpu_mem_usage can't be used at the same time
                         lowmem = {}
+                    if use_8_bit:
+                        properties_for_8_bit = {"load_in_8bit": True, "device_map": 'auto'}
+                    else:
+                        properties_for_8_bit = {"load_in_8bit": False}
                     if(os.path.isdir(koboldai_vars.custmodpth)):
                         try:
-                            tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", use_fast=False, load_in_8bit=use_8_bit, device_map="auto")
+                            tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", use_fast=False, load_in_8bit=use_8_bit)
                         except Exception as e:
                             try:
-                                tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                             except Exception as e:
                                 try:
-                                    tokenizer = GPT2Tokenizer.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                    tokenizer = GPT2Tokenizer.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                                 except Exception as e:
-                                    tokenizer = GPT2Tokenizer.from_pretrained("gpt2", revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                    tokenizer = GPT2Tokenizer.from_pretrained("gpt2", revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                         try:
-                            model     = AutoModelForCausalLM.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", **lowmem, load_in_8bit=use_8_bit, device_map="auto")
+                            model     = AutoModelForCausalLM.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                         except Exception as e:
                             if("out of memory" in traceback.format_exc().lower()):
                                 raise RuntimeError("One of your GPUs ran out of memory when KoboldAI tried to load your model.")
-                            model     = GPTNeoForCausalLM.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", **lowmem, load_in_8bit=use_8_bit, device_map="auto")
+                            model     = GPTNeoForCausalLM.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                     elif(os.path.isdir("models/{}".format(koboldai_vars.model.replace('/', '_')))):
                         try:
-                            tokenizer = AutoTokenizer.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", use_fast=False, load_in_8bit=use_8_bit, device_map="auto")
+                            tokenizer = AutoTokenizer.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", use_fast=False, load_in_8bit=use_8_bit)
                         except Exception as e:
                             try:
-                                tokenizer = AutoTokenizer.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                tokenizer = AutoTokenizer.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                             except Exception as e:
                                 try:
-                                    tokenizer = GPT2Tokenizer.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                    tokenizer = GPT2Tokenizer.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                                 except Exception as e:
                                     tokenizer = GPT2Tokenizer.from_pretrained("gpt2", revision=args.revision, cache_dir="cache")
                         try:
-                            model     = AutoModelForCausalLM.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", **lowmem, load_in_8bit=use_8_bit, device_map="auto")
+                            model     = AutoModelForCausalLM.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                         except Exception as e:
                             if("out of memory" in traceback.format_exc().lower()):
                                 raise RuntimeError("One of your GPUs ran out of memory when KoboldAI tried to load your model.")
-                            model     = GPTNeoForCausalLM.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", **lowmem, load_in_8bit=use_8_bit, device_map="auto")
+                            model     = GPTNeoForCausalLM.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                     else:
                         old_rebuild_tensor = torch._utils._rebuild_tensor
                         def new_rebuild_tensor(storage: Union[torch_lazy_loader.LazyTensor, torch.Storage], storage_offset, shape, stride):
@@ -3192,21 +3196,21 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                         torch._utils._rebuild_tensor = new_rebuild_tensor
 
                         try:
-                            tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", use_fast=False, load_in_8bit=use_8_bit, device_map="auto")
+                            tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", use_fast=False, load_in_8bit=use_8_bit)
                         except Exception as e:
                             try:
-                                tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                tokenizer = AutoTokenizer.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                             except Exception as e:
                                 try:
-                                    tokenizer = GPT2Tokenizer.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit, device_map="auto")
+                                    tokenizer = GPT2Tokenizer.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", load_in_8bit=use_8_bit)
                                 except Exception as e:
                                     tokenizer = GPT2Tokenizer.from_pretrained("gpt2", revision=args.revision, cache_dir="cache")
                         try:
-                            model     = AutoModelForCausalLM.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", **lowmem, load_in_8bit=use_8_bit, device_map="auto")
+                            model     = AutoModelForCausalLM.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                         except Exception as e:
                             if("out of memory" in traceback.format_exc().lower()):
                                 raise RuntimeError("One of your GPUs ran out of memory when KoboldAI tried to load your model.")
-                            model     = GPTNeoForCausalLM.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", **lowmem, load_in_8bit=use_8_bit, device_map="auto")
+                            model     = GPTNeoForCausalLM.from_pretrained(koboldai_vars.model, revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
 
                         torch._utils._rebuild_tensor = old_rebuild_tensor
 
@@ -8779,7 +8783,7 @@ def UI_2_load_model(data):
             gpu_layers, disk_layers = file_data
             if gpu_layers == data['gpu_layers'] and disk_layers == data['disk_layers']:
                 changed = False
-    if changed:
+    if changed and not ['8bit']:
         f = open("settings/" + data['model'].replace('/', '_') + ".breakmodel", "w")
         f.write("{}\n{}".format(data['gpu_layers'], data['disk_layers']))
         f.close()
