@@ -2689,6 +2689,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
     global model_config
     global GPT2Tokenizer
     global tokenizer
+    logger.info("use_gpu={}, gpu_layers={}, disk_layers={}, initial_load={}, online_model={}, use_breakmodel_args={}, breakmodel_args_default_to_cpu={}, url={}, use_8_bit={}".format(use_gpu, gpu_layers, disk_layers, initial_load, online_model, use_breakmodel_args, breakmodel_args_default_to_cpu, url, use_8_bit))
     koboldai_vars.aibusy = True
     koboldai_vars.horde_share = False
     if(initial_load):
