@@ -3143,24 +3143,22 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                 with maybe_use_float16(), torch_lazy_loader.use_lazy_torch_load(enable=koboldai_vars.lazy_load, callback=get_lazy_load_callback(utils.num_layers(model_config)) if koboldai_vars.lazy_load else None, dematerialized_modules=True):
                     if(koboldai_vars.lazy_load):  # torch_lazy_loader.py and low_cpu_mem_usage can't be used at the same time
                         lowmem = {}
-                    device_map = {"model.decoder.embed_tokens": 0, "model.decoder.embed_positions": 0, "model.decoder.final_layer_norm": 0, "lm_head": 0}
+                    device_map = {}
                     if not isinstance(gpu_layers, list):
                         gpu_layers = [int(x) for x in gpu_layers.split(",")]
                     current_layer = 0
                     for i in range(len(gpu_layers)):
                         for j in range(gpu_layers[i]+1):
                             if current_layer == 0:
-                                device_map["model.decoder.embed_tokens"] = i
-                                device_map["model.decoder.embed_positions"] = i
-                                device_map["model.decoder.final_layer_norm"] = i
+                                device_map["model"] = i
+                                device_map["transformer"] = i
                                 device_map["lm_head"] = i
                             device_map["model.decoder.layers.{}".format(current_layer)] = i
                             current_layer += 1
                     for i in range(current_layer, int(total_layers)+1):
                         if current_layer == 0:
-                            device_map["model.decoder.embed_tokens"] = "cpu"
-                            device_map["model.decoder.embed_positions"] = "cpu"
-                            device_map["model.decoder.final_layer_norm"] = "cpu"
+                            device_map["model"] = "cpu"
+                            device_map["transformer"] = "cpu"
                             device_map["lm_head"] = "cpu"
                         device_map["model.decoder.layers.{}".format(i)] = "cpu"
                     
@@ -3186,6 +3184,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                         except Exception as e:
                             if("out of memory" in traceback.format_exc().lower()):
                                 raise RuntimeError("One of your GPUs ran out of memory when KoboldAI tried to load your model.")
+                            raise
                             model     = GPTNeoForCausalLM.from_pretrained(koboldai_vars.custmodpth, revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                     elif(os.path.isdir("models/{}".format(koboldai_vars.model.replace('/', '_')))):
                         try:
@@ -3203,6 +3202,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                         except Exception as e:
                             if("out of memory" in traceback.format_exc().lower()):
                                 raise RuntimeError("One of your GPUs ran out of memory when KoboldAI tried to load your model.")
+                            raise
                             model     = GPTNeoForCausalLM.from_pretrained("models/{}".format(koboldai_vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", **lowmem, **properties_for_8_bit)
                     else:
                         old_rebuild_tensor = torch._utils._rebuild_tensor
