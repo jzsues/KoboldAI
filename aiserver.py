@@ -3158,6 +3158,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                                 device_map["gpt_neox.embed_in"] = i
                             device_map["model.decoder.layers.{}".format(current_layer)] = i
                             device_map["gpt_neox.layers.{}".format(current_layer)] = i
+                            device_map["gpt_neox.final_layer_norm"] = i
                             current_layer += 1
                     for i in range(current_layer, int(total_layers)+1):
                         if current_layer == 0:
@@ -3166,6 +3167,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                             device_map["decoder"] = "cpu"
                             device_map["lm_head"] = "cpu"
                             device_map["gpt_neox.embed_in"] = "cpu"
+                            device_map["gpt_neox.final_layer_norm"] = "cpu"
                         device_map["model.decoder.layers.{}".format(i)] = "cpu"
                         device_map["gpt_neox.layers.{}".format(current_layer)] = "cpu"
                     
