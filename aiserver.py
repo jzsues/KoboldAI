@@ -1514,6 +1514,7 @@ def general_startup(override_args=None):
     parser.add_argument("--summarizer_model", action='store', default="philschmid/bart-large-cnn-samsum", help="Huggingface model to use for summarization. Defaults to sshleifer/distilbart-cnn-12-6")
     parser.add_argument("--max_summary_length", action='store', default=75, help="Maximum size for summary to send to image generation")
     parser.add_argument("--multi_story", action='store_true', default=False, help="Allow multi-story mode (experimental)")
+    parser.add_argument("--load_in_8bit_threshold", action='store', default=6, help="set's load_in_8bit_threshold value", type=int)
     
     parser.add_argument('-f', action='store', help="option for compatability with colab memory profiles")
     parser.add_argument('-v', '--verbosity', action='count', default=0, help="The default logging level is ERROR or higher. This value increases the amount of logging seen in your screen")
@@ -3168,6 +3169,8 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                         
                     if use_8_bit:
                         properties_for_8_bit = {"load_in_8bit": True, "device_map": device_map}
+                        if args.load_in_8bit_threshold is not None:
+                            properties_for_8_bit['load_in_8bit_threshold'] = args.load_in_8bit_threshold
                     else:
                         properties_for_8_bit = {"load_in_8bit": False}
                     if(os.path.isdir(koboldai_vars.custmodpth)):
