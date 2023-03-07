@@ -121,6 +121,9 @@ if [ "$init" != "skip" ]; then
         if [ "$git" == "united" ]; then
             git=https://github.com/henk717/KoboldAI-Client
         fi
+	if [ "$git" == "8bit" ]; then
+	    git=https://github.com/jzsues/KoboldAI.git
+	fi
     else
         git=https://github.com/koboldai/KoboldAI-Client
     fi
